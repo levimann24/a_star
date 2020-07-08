@@ -19,7 +19,7 @@ class AStar:
         self._create_grid()
 
         # initialize start
-        start_center = self._grid_location((0, 0))
+        start_center = self._grid_location((4, 4))
         self.start_location = fill_block.FillBlock(self, 'black', start_center)
         end_center = (self.settings.WIDTH - self.settings.grid_width/2,
                       self.settings.HEIGHT - self.settings.grid_height/2)
@@ -68,8 +68,8 @@ class AStar:
             self.grid_lines.append(line)
 
     def _grid_location(self, coords):
-        x = self.settings.grid_width/2 * (coords[0]+1)
-        y = self.settings.grid_height/2 * (coords[1]+1)
+        x = self.settings.grid_width/2 * (coords[0]*2+1)
+        y = self.settings.grid_height/2 * (coords[1]*2+1)
         new = (x, y)
         return new
 
