@@ -11,13 +11,13 @@ class FillBlock:
         self.f = self.g + self.h
 
         # initialize block
-        color_map = {
+        self.color_map = {
             'red': (255, 0, 0),
             'black': (0, 0, 0),
             'green': (0, 255, 0),
             'blue': (0, 0, 255),
         }
-        self.color = color_map[color]
+        self.color = self.color_map[color]
         self.height = self.settings.grid_height
         self.width = self.settings.grid_width
         self.coords = coords
@@ -35,3 +35,6 @@ class FillBlock:
         y = self.settings.grid_height/2 * (coords[1]*2+1)
         new = (x, y)
         return new
+
+    def change_color(self, color):
+        self.color = self.color_map[color]

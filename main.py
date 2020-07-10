@@ -5,10 +5,12 @@ import grid
 import fill_block
 import open_set_block
 import math
+import boundary
 
 
 class AStar:
     def __init__(self):
+        pygame.init()
         self.settings = settings.Settings()
 
         # initialize the screen
@@ -21,7 +23,7 @@ class AStar:
         self._create_grid()
 
         # initialize start and end
-        start_center = (4, 30)
+        start_center = (2, 2)
         end_center = (self.settings.WIDTH/self.settings.grid_width-2,
                       self.settings.HEIGHT/self.settings.grid_height-2)
         start_h = self._find_distance(start_center, end_center)
@@ -31,10 +33,15 @@ class AStar:
             self, 'red', end_center, start_h, 0)
         self.end_coords = self.end_location.coords
 
+        # initialize boundary
+        self.boundaries = boundary.Boundary(self)
+
         # initialize queue
         self.queue = []
         self.coords = []
         self.short_path = []
+        self.horiz_verti = True
+        self.diagonal = True
         self._create_queue(start_center, self.start_location.g)
 
     def on_event(self):
@@ -69,6 +76,7 @@ class AStar:
             element.draw_open()
         for element in self.short_path:
             element.draw_fill()
+        self.boundaries.draw_boundary()
         pygame.display.flip()
 
     def on_cleanup(self):
@@ -156,11 +164,18 @@ class AStar:
         six = (x, y_d)
         seven = (x_l, y_d)
         eight = (x_l, y)
-        coords = [one, two, three, four, five, six, seven, eight]
+        if self.horiz_verti and self.diagonal:
+            coords = [one, two, three, four, five, six, seven, eight]
+        elif self.horiz_verti:
+            coords = [two, four, six, eight]
+        else:
+            coords = [one, three, five, seven]
         for node in coords:
             if node[0] < 0 or node[0] > self.settings.WIDTH-1 or node[1] < 0 or node[1] > self.settings.HEIGHT:
                 continue
             elif node in self.coords:
+                continue
+            elif node in self.boundaries.line_coords:
                 continue
             else:
                 new = open_set_block.OpenBlock(
@@ -181,6 +196,10 @@ class AStar:
     def _create_short_path(self, coords, g, h):
         new = fill_block.FillBlock(self, 'green', coords, g, h)
         self.short_path.append(new)
+
+# TODO: MAKE IT EITHER HORIZONTAL/VERTICAL OR DIAGANAL OR BOTH
+# TODO: MAKE IT TO WHERE YOU CAN DRAW SOME BOUNDARIES
+# TODO: MAKE IT EASIER FOR THE COLORS TO CHANGE TO FILL AND NOT
 
 
 if __name__ == "__main__":

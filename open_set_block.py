@@ -16,13 +16,13 @@ class OpenBlock:
         self.f = self.g + self.h
 
         # initialize block
-        color_map = {
+        self.color_map = {
             'red': (255, 0, 0),
             'black': (0, 0, 0),
             'green': (0, 255, 0),
             'blue': (0, 0, 255),
         }
-        self.color = color_map[color]
+        self.color = self.color_map[color]
         self.height = self.settings.grid_height
         self.width = self.settings.grid_width
         self.center = self._grid_location(self.coords)
@@ -55,3 +55,6 @@ class OpenBlock:
         y2 = self.end_coords[1]
         d = math.sqrt((x1-x2)**2 + (y1-y2)**2)
         return d
+
+    def change_color(self, color):
+        self.color = self.color_map[color]

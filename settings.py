@@ -9,3 +9,6 @@ class Settings:
         self.grid_width = 20
         self.grid_height = 20
         self.grid_color = (200, 200, 200)
+
+        # Boundary Settings
+        self.n_boundary = 1
