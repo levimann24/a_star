@@ -18,11 +18,14 @@ class AStar:
             (self.settings.WIDTH, self.settings.HEIGHT))
         pygame.display.set_caption("A * Search Algorithm")
 
+        # start variable
+        self.start = False
+
         # initialize the grid
         self.grid_lines = []
         self._create_grid()
 
-        # initialize start and end
+        # initialize start and end for testing
         start_center = (2, 2)
         end_center = (self.settings.WIDTH/self.settings.grid_width-2,
                       self.settings.HEIGHT/self.settings.grid_height-2)
@@ -33,8 +36,16 @@ class AStar:
             self, 'red', end_center, start_h, 0)
         self.end_coords = self.end_location.coords
 
-        # initialize boundary
-        self.boundaries = boundary.Boundary(self)
+        # Initialize start and end with mouse
+        #self.start_center = None
+        #self.end_center = None
+
+        # initialize boundary testing
+        #self.boundaries = boundary.Boundary(self)
+
+        # initialize boundaries with mouse
+        self.boundaries = []
+        self.boundary_coords = []
 
         # initialize queue
         self.queue = []
@@ -51,20 +62,24 @@ class AStar:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_q:
                     sys.exit()
+                if event.key == pygame.K_SPACE:
+                    self.start = True
+        self.mouse_press()
 
     def on_loop(self):
-        if self.queue:
-            if self.short_path:
-                if self.short_path[-1].coords == self.end_coords:
-                    pass
+        if self.start:
+            if self.queue:
+                if self.short_path:
+                    if self.short_path[-1].coords == self.end_coords:
+                        pass
+                    else:
+                        self.check_lowest_f()
+                        self._create_queue(
+                            self.short_path[-1].coords, self.short_path[-1].g)
                 else:
                     self.check_lowest_f()
                     self._create_queue(
                         self.short_path[-1].coords, self.short_path[-1].g)
-            else:
-                self.check_lowest_f()
-                self._create_queue(
-                    self.short_path[-1].coords, self.short_path[-1].g)
 
     def on_render(self):
         self.screen.fill(self.settings.bg_color)
@@ -76,7 +91,8 @@ class AStar:
             element.draw_open()
         for element in self.short_path:
             element.draw_fill()
-        self.boundaries.draw_boundary()
+        for boundary in self.boundaries:
+            boundary.draw_boundary()
         pygame.display.flip()
 
     def on_cleanup(self):
@@ -108,19 +124,6 @@ class AStar:
         self._create_short_path(lowest_coords, lowest_g, lowest_h)
         del self.queue[lowest_i]
 
-    # def _find_path(self):
-    #     while self.queue:
-    #         if self.short_path:
-    #             if self.short_path[-1].coords == self.end_coords:
-    #                 break
-    #         else:
-    #             self.check_lowest_f()
-    #             self._create_queue(
-    #                 self.short_path[-1].coords, self.short_path[-1].g)
-    #             self.on_event()
-    #             # self.on_loop()
-    #             self.on_render()
-
 # ---------------------------------------------------------------------
 
     def _create_grid(self):
@@ -150,6 +153,8 @@ class AStar:
 
 # -------------------------------------------------------------------
     def _create_queue(self, node_coords, g):
+        # if self.boundaries:
+        #     self._create_boundary_coords()
         x = node_coords[0]
         y = node_coords[1]
         x_r = x + 1
@@ -171,12 +176,13 @@ class AStar:
         else:
             coords = [one, three, five, seven]
         for node in coords:
-            if node[0] < 0 or node[0] > self.settings.WIDTH-1 or node[1] < 0 or node[1] > self.settings.HEIGHT:
+            if node[0] < 0 or node[0] >= self.settings.WIDTH/self.settings.grid_width-1 or node[1] < 0 or node[1] >= self.settings.HEIGHT/self.settings.grid_height:
                 continue
             elif node in self.coords:
                 continue
-            elif node in self.boundaries.line_coords:
-                continue
+            elif self.boundary_coords:
+                if node in self.boundary_coords:
+                    continue
             else:
                 new = open_set_block.OpenBlock(
                     self, 'blue', node, g, node_coords)
@@ -200,6 +206,22 @@ class AStar:
 # TODO: MAKE IT EITHER HORIZONTAL/VERTICAL OR DIAGANAL OR BOTH
 # TODO: MAKE IT TO WHERE YOU CAN DRAW SOME BOUNDARIES
 # TODO: MAKE IT EASIER FOR THE COLORS TO CHANGE TO FILL AND NOT
+    def mouse_press(self):
+        if pygame.mouse.get_pressed()[0]:
+            pos = pygame.mouse.get_pos()
+            mouse_coord = (pos[0]//self.settings.grid_width,
+                           pos[1]//self.settings.grid_height)
+            bound = boundary.Boundary(self, mouse_coord)
+            self.boundaries.append(bound)
+            self.coords.append(mouse_coord)
+
+        elif pygame.mouse.get_pressed()[2]:
+            pass
+
+    # def _create_boundary_coords(self):
+    #     for boundary in self.boundaries:
+    #         if boundary.coords not in self.boundary_coords:
+    #             self.boundary_coords.append(boundary.coords)
 
 
 if __name__ == "__main__":
